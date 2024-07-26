@@ -6,5 +6,6 @@
 # --------------------------------------------------------------------------------
 
 KEY_CANCELLATION_ENABLE = yes
+CONSOLE_ENABLE=yes
 
 INTROSPECTION_KEYMAP_C = test_key_cancellations.c

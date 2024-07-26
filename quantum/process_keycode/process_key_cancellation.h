@@ -18,3 +18,8 @@ bool key_cancellation_is_enabled(void);
 void key_cancellation_enable(void);
 void key_cancellation_disable(void);
 void key_cancellation_toggle(void);
+
+bool key_cancellation_recovery_is_enabled(void);
+void key_cancellation_recovery_enable(void);
+void key_cancellation_recovery_disable(void);
+void key_cancellation_recovery_toggle(void);
