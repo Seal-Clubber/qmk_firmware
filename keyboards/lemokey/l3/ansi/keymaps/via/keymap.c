@@ -62,6 +62,15 @@ const key_cancellation_t PROGMEM key_cancellation_list[] = {
 };
 #endif
 
+void keyboard_init_user(void) {
+    // Set the RGB light mode to RGB_MODE_STATIC_LIGHT
+    rgblight_mode(RGBLIGHT_MODE_STATIC_LIGHT);
+
+    // Set the RGB color to blue
+    rgblight_setrgb(0, 0, 255); // RGB values for blue
+}
+
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_record_lemokey_common(keycode, record)) {
         return false;
