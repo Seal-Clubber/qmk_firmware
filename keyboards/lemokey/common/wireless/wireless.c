@@ -374,13 +374,10 @@ void wireless_send_nkro(report_nkro_t *report) {
     if (wireless_state == WT_CONNECTED || (wireless_state == WT_PARING && pincodeEntry)) {
         if (wireless_transport.send_nkro) {
 #ifndef DISABLE_REPORT_BUFFER
-
             report_buffer_t report_buffer;
             report_buffer.type = REPORT_TYPE_NKRO;
             memcpy(&report_buffer.nkro, report, sizeof(report_nkro_t));
             report_buffer_enqueue(&report_buffer);
-
-            wireless_transport.send_nkro(&report->mods);
 #else
             wireless_transport.send_nkro(&report->mods);
 #endif
@@ -524,6 +521,15 @@ void wireless_task(void) {
     lemokey_wireless_common_task();
     battery_task();
     lpm_task();
+}
+
+void send_string_task(void) {
+    if ((get_transport() & TRANSPORT_WIRELESS) && wireless_get_state() == WT_CONNECTED) {
+        wireless_transport.task();
+#ifndef DISABLE_REPORT_BUFFER
+        report_buffer_task();
+#endif
+    }
 }
 
 wt_state_t wireless_get_state(void) {

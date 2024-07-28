@@ -126,6 +126,7 @@
     * [PS/2 Mouse](feature_ps2_mouse.md)
     * [Split Keyboard](feature_split_keyboard.md)
     * [Stenography](feature_stenography.md)
+    * [Key Cancellation](feature_key_cancellation.md)
 
   * Keyboard Building
     * [Easy Maker for One Offs](easy_maker.md)
