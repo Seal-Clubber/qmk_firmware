@@ -16,8 +16,14 @@
 
 #include QMK_KEYBOARD_H
 #include "lemokey_common.h"
+#include "features/mouse_turbo_click.h"
 
 // clang-format off
+
+enum custom_keycodes {
+  MC_AUCL = SAFE_RANGE,
+  // Other custom keys...
+};
 
 enum layer_names {
     BASE = 0,
@@ -39,7 +45,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KX_CATG,  RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
         KX_RETG,  KC_CAPS,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______,  _______,  _______,  _______,  _______,  _______,              _______,
         _______,  _______,            _______,  _______,  _______,  _______,  BAT_LVL,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,            _______,
-        _______,  _______,  GUI_TOG,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
+        MC_AUCL,    _______,  GUI_TOG,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
 };
 
 // clang-format on
@@ -64,18 +70,31 @@ const key_cancellation_t PROGMEM key_cancellation_list[] = {
 
 #ifdef RGB_MATRIX_ENABLE
 bool rgb_matrix_indicators_user() {
-    if (!key_cancellation_is_enabled()) {
-        rgb_matrix_set_color(33, 255, 0, 0);
+    if (layer_state_is(FN)) {  // Replace FN_LAYER with the actual layer number.
+        if (!key_cancellation_is_enabled()) {
+            rgb_matrix_set_color(33, 255, 0, 0);
+        }
+        if (!key_cancellation_recovery_is_enabled()) {
+            rgb_matrix_set_color(51, 255, 0, 0);
+        }
+        if (!is_turbo_click_active()) {
+            rgb_matrix_set_color(79, 255, 0, 0);
+        }
     }
-    if (!key_cancellation_recovery_is_enabled()) {
-        rgb_matrix_set_color(51, 255, 0, 0);
+
+    if (is_turbo_click_active()) {
+        rgb_matrix_set_color(79, 0, 255, 0);
     }
+
     return false;
 }
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_record_lemokey_common(keycode, record)) {
+        return false;
+    }
+    if (!process_mouse_turbo_click(keycode, record, MC_AUCL)) {
         return false;
     }
 
