@@ -8,12 +8,8 @@
 #include "action_util.h"
 #include "keymap_introspection.h"
 #include "debug.h"
-#include <stdlib.h>  // Include for rand()
-#include <time.h>    // Include for seeding rand()
 
 #define KEYREPORT_BUFFER_SIZE 10
-#define RELEASE_MIN_MS 20
-#define RELEASE_MAX_MS 30
 
 // key cancellation up stroke buffer
 uint16_t buffer_keyreports[KEYREPORT_BUFFER_SIZE];
@@ -168,11 +164,6 @@ bool key_cancellation_is_key_in_press_list(uint16_t keycode) {
     return false;
 }
 
-// Function to generate a random delay between RELEASE_MIN_MS and RELEASE_MAX_MS
-uint16_t get_random_delay_ms() {
-    return (rand() % (RELEASE_MAX_MS - RELEASE_MIN_MS + 1)) + RELEASE_MIN_MS;
-}
-
 /**
  * @brief Process handler for key_cancellation feature
  *
@@ -211,6 +202,12 @@ bool process_key_cancellation(uint16_t keycode, keyrecord_t *record) {
         return true;
     }
 
+/*
+    if (!record->event.pressed) {
+        return true;
+    }
+*/
+
     // only supports basic keycodes
     if (!IS_BASIC_KEYCODE(keycode)) {
         return true;
@@ -220,7 +217,7 @@ bool process_key_cancellation(uint16_t keycode, keyrecord_t *record) {
         return true;
     }
 
-    // if key cancellation recovery is not enabled then do not process key up events
+// if key cancellation recovery is not enabled then do not process key up events
     if (!keymap_config.key_cancellation_recovery_enable && !record->event.pressed) {
         return true;
     }
@@ -251,9 +248,6 @@ bool process_key_cancellation(uint16_t keycode, keyrecord_t *record) {
         for (int i = 0; i < key_cancellation_count(); i++) {
             key_cancellation_t key_cancellation = key_cancellation_get(i);
             if (keycode == key_cancellation.press) {
-                uint16_t delayms = get_random_delay_ms();
-                ac_dprintf("Applying delay of %d ms before deleting key (press).\n", delayms);
-                wait_ms(delayms);  // Adding random delay before deleting the key
                 del_key(key_cancellation.unpress);
             }
         }
@@ -265,9 +259,6 @@ bool process_key_cancellation(uint16_t keycode, keyrecord_t *record) {
                 if (key_cancellation.press == buffer_keyreports_temp[j]) {
                     // if key cancellation unpress is in buffer
                     if (key_cancellation_is_key_in_buffer(key_cancellation.unpress)) {
-                        uint16_t delayms = get_random_delay_ms();
-                        ac_dprintf("Applying delay of %d ms before removing key from buffer (unpress).\n", delayms);
-                        wait_ms(delayms);  // Adding random delay before removing key from the buffer
                         // remove key cancellation unpress from buffer
                         del_key_buffer_temp(key_cancellation.unpress, j);
                     }
@@ -289,9 +280,6 @@ bool process_key_cancellation(uint16_t keycode, keyrecord_t *record) {
         for (int i = 0; i < buffer_keyreport_count; i++) {
             if (buffer_keyreports[i] != buffer_keyreports_temp[i]) {
                 if (buffer_keyreports_temp[i] == 0) {
-                    uint16_t delayms = get_random_delay_ms();
-                    ac_dprintf("Applying delay of %d ms before deleting key (buffer comparison).\n", delayms);
-                    wait_ms(delayms);  // Adding random delay before deleting the key
                     del_key(buffer_keyreports[i]);
                 }
             } else {
