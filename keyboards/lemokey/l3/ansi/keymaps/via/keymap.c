@@ -86,7 +86,7 @@ bool rgb_matrix_indicators_user() {
         rgb_matrix_set_color(79, 0, 255, 0);
     }
 
-    return false;
+    return true;
 }
 #endif
 
