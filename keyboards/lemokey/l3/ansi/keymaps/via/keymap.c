@@ -17,11 +17,16 @@
 #include QMK_KEYBOARD_H
 #include "lemokey_common.h"
 #include "features/mouse_turbo_click.h"
+#include "features/socd_cleaner.h"
+
+socd_cleaner_t socd_ws = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
+socd_cleaner_t socd_ad = {{KC_A, KC_D}, SOCD_CLEANER_LAST};
 
 // clang-format off
 
 enum custom_keycodes {
   MC_AUCL = SAFE_RANGE,
+  SOCDTOG,
   // Other custom keys...
 };
 
@@ -44,7 +49,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                   _______,  BT_HST1,  BT_HST2,  BT_HST3,  P2P4G,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
         KX_CATG,  RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
         KX_RETG,  KC_CAPS,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______,  _______,  _______,  _______,  _______,  _______,              _______,
-        _______,  _______,            _______,  _______,  _______,  _______,  BAT_LVL,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,            _______,
+        SOCDTOG,  _______,            _______,  _______,  _______,  _______,  BAT_LVL,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,            _______,
         MC_AUCL,    _______,  GUI_TOG,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
 };
 
@@ -68,34 +73,56 @@ const key_cancellation_t PROGMEM key_cancellation_list[] = {
 };
 #endif
 
+/*
+// Key Matrix to LED Index
+		{ __, __, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, },
+        { __, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, },
+        { 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, },
+        { 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, __, 64, __, __, __, },
+        { 65, 66, __, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, __, 77, __, 78, __, },
+        { 79, 80, 81, 82, __, __, __, 83, __, __, __, 84, 85, 86, 87, 88, 89, 90, }
+*/
+
 #ifdef RGB_MATRIX_ENABLE
 bool rgb_matrix_indicators_user() {
-    if (layer_state_is(FN)) {  // Replace FN_LAYER with the actual layer number.
+    if (layer_state_is(FN)) {
         if (!key_cancellation_is_enabled()) {
             rgb_matrix_set_color(33, 255, 0, 0);
         }
         if (!key_cancellation_recovery_is_enabled()) {
             rgb_matrix_set_color(51, 255, 0, 0);
         }
+        if (!socd_cleaner_enabled) {
+            rgb_matrix_set_color(65, 255, 0, 0);
+        }
         if (!is_turbo_click_active()) {
             rgb_matrix_set_color(79, 255, 0, 0);
         }
     }
-
-    if (is_turbo_click_active()) {
-        rgb_matrix_set_color(79, 0, 255, 0);
-    }
-
     return true;
 }
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+    case SOCDTOG:  // Toggle SOCD Cleaner.
+      if (record->event.pressed) {
+        socd_cleaner_enabled = !socd_cleaner_enabled;
+      }
+      return false;
+    }
     if (!process_record_lemokey_common(keycode, record)) {
         return false;
     }
     if (!process_mouse_turbo_click(keycode, record, MC_AUCL)) {
         return false;
+    }
+    
+    if (!process_socd_cleaner(keycode, record, &socd_ws)) { 
+        return false; 
+    }
+    if (!process_socd_cleaner(keycode, record, &socd_ad)) { 
+        return false; 
     }
 
     return true;
