@@ -79,8 +79,11 @@ bool rgb_matrix_indicators_user() {
         }
         if (!is_turbo_click_active()) {
             rgb_matrix_set_color(79, 255, 0, 0);
+        } else { 
+            rgb_matrix_set_color(79, 0, 255, 0);
         }
     }
+
     return true;
 }
 #endif
@@ -95,21 +98,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
 
-    if (!process_record_lemokey_common(keycode, record)) {
-        return false;
-    }
-
-    if (!process_mouse_turbo_click(keycode, record, MC_AUCL)) {
-        return false;
-    }
-    
-    if (!process_socd_cleaner(keycode, record, &socd_ws)) { 
-        return false; 
-    }
-
-    if (!process_socd_cleaner(keycode, record, &socd_ad)) { 
-        return false; 
-    }
+    if (!process_record_lemokey_common(keycode, record)) { return false; }
+    if (!process_mouse_turbo_click(keycode, record, MC_AUCL)) { return false; }
+    if (!process_socd_cleaner(keycode, record, &socd_ws)) { return false; }
+    if (!process_socd_cleaner(keycode, record, &socd_ad)) { return false; }
 
     return true;
 }
