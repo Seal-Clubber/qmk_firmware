@@ -19,6 +19,9 @@
 #include "features/mouse_turbo_click.h"
 #include "features/socd_cleaner.h"
 
+socd_cleaner_t socd_ws = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
+socd_cleaner_t socd_ad = {{KC_A, KC_D}, SOCD_CLEANER_LAST};
+
 // clang-format off
 
 enum custom_keycodes {
@@ -57,18 +60,6 @@ const uint16_t PROGMEM encoder_map[][1][2] = {
     [FN]   = {ENCODER_CCW_CW(RGB_VAD, RGB_VAI)},
 };
 #endif // ENCODER_MAP_ENABLE
-
-#if defined(KEY_CANCELLATION_ENABLE)
-const key_cancellation_t PROGMEM key_cancellation_list[] = {
-    // on key down
-    //       |    key to be released
-    //       |     |
-    [0] = {KC_D, KC_A},
-    [1] = {KC_A, KC_D},
-    [2] = {KC_W, KC_S},
-    [3] = {KC_S, KC_W},
-};
-#endif
 
 /*
 // Key Matrix to LED Index
@@ -115,7 +106,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_socd_cleaner(keycode, record, &socd_ws)) { 
         return false; 
     }
-    
+
     if (!process_socd_cleaner(keycode, record, &socd_ad)) { 
         return false; 
     }
