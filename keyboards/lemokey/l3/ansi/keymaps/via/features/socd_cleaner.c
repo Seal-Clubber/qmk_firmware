@@ -21,7 +21,7 @@
  */
 
 #include "socd_cleaner.h"
-#include <stdlib.h>
+//#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,10 +31,10 @@ bool socd_cleaner_enabled = false;
 
 static void update_key(uint8_t keycode, bool press) {
   if (press) {
-    wait_ms(30 + (rand() % 51));
+    //wait_ms(30 + (rand() % 51));
     add_key(keycode);
   } else {
-    wait_ms(30 + (rand() % 51));
+    //wait_ms(30 + (rand() % 51));
     del_key(keycode);
   }
 }
