@@ -16,8 +16,16 @@
 
 #include QMK_KEYBOARD_H
 #include "lemokey_common.h"
+#include "features/mouse_turbo_click.h"
+#include "features/socd_cleaner.h"
 
 // clang-format off
+
+enum custom_keycodes {
+  MC_AUCL = SAFE_RANGE,
+  SOCDTOG,
+  // Other custom keys...
+};
 
 enum layer_names {
     BASE = 0,
@@ -27,20 +35,19 @@ enum layer_names {
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [BASE] = LAYOUT_ansi_tkl(
-                  KC_MUTE,  KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,     KC_F12,   KC_PSCR,  KC_SCRL,  KC_PAUS,
+                  KC_MPLY,  KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,     KC_F12,   KC_PSCR,  KC_SCRL,  KC_PAUS,
                   KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,     KC_BSPC,  KC_INS,   KC_HOME,  KC_PGUP,
         MC_0,     KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,    KC_BSLS,  KC_DEL,   KC_END,   KC_PGDN,
-        MC_1,     KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,              KC_ENT,
+        MC_1,     _______,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,              KC_ENT,
         MC_2,     KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,              KC_RSFT,            KC_UP,
         MC_3,     KC_LCTL,  KC_LWIN,  KC_LALT,                                KC_SPC,                                 KC_RALT,  MO(FN),   KC_APP,     KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
-
     [FN] = LAYOUT_ansi_tkl(
-                  RGB_TOG,  _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  RGB_VAD,  RGB_VAI,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,    KC_VOLU,  _______,  _______,  _______,
+                  RGB_TOG,  _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FILE,  RGB_VAD,  RGB_VAI,  KC_MPLY,  KC_MPRV,  KC_MNXT,  KC_MUTE,  KC_VOLD,    KC_VOLU,  _______,  _______,  _______,
                   _______,  BT_HST1,  BT_HST2,  BT_HST3,  P2P4G,    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
         _______,  RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
-        _______,  _______,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______,  _______,  _______,  _______,  _______,  _______,              _______,
-        _______,  _______,            _______,  _______,  _______,  _______,  BAT_LVL,  _______,  _______,  _______,  _______,  _______,              _______,            _______,
-        _______,  _______,  GUI_TOG,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
+        _______,  KC_CAPS,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______,  _______,  _______,  _______,  _______,  _______,              _______,
+        SOCDTOG,  _______,            _______,  _______,  _______,  _______,  BAT_LVL,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,            _______,
+        MC_AUCL,  _______,  GUI_TOG,  _______,                                _______,                                _______,  _______,  _______,    _______,  _______,  _______,  _______),
 };
 
 // clang-format on
@@ -51,9 +58,66 @@ const uint16_t PROGMEM encoder_map[][1][2] = {
 };
 #endif // ENCODER_MAP_ENABLE
 
+#if defined(KEY_CANCELLATION_ENABLE)
+const key_cancellation_t PROGMEM key_cancellation_list[] = {
+    // on key down
+    //       |    key to be released
+    //       |     |
+    [0] = {KC_D, KC_A},
+    [1] = {KC_A, KC_D},
+    [2] = {KC_W, KC_S},
+    [3] = {KC_S, KC_W},
+};
+#endif
+
+/*
+// Key Matrix to LED Index
+		{ __, __, 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, },
+        { __, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, },
+        { 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, },
+        { 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, __, 64, __, __, __, },
+        { 65, 66, __, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, __, 77, __, 78, __, },
+        { 79, 80, 81, 82, __, __, __, 83, __, __, __, 84, 85, 86, 87, 88, 89, 90, }
+*/
+
+#ifdef RGB_MATRIX_ENABLE
+bool rgb_matrix_indicators_user() {
+    if (layer_state_is(FN)) {
+        if (!socd_cleaner_enabled) {
+            rgb_matrix_set_color(65, 255, 0, 0);
+        }
+        if (!is_turbo_click_active()) {
+            rgb_matrix_set_color(79, 255, 0, 0);
+        }
+    }
+    return true;
+}
+#endif
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+
+    case SOCDTOG:  // Toggle SOCD Cleaner.
+        if (record->event.pressed) {
+            socd_cleaner_enabled = !socd_cleaner_enabled;
+        }
+        return false;
+    }
+
     if (!process_record_lemokey_common(keycode, record)) {
         return false;
+    }
+
+    if (!process_mouse_turbo_click(keycode, record, MC_AUCL)) {
+        return false;
+    }
+    
+    if (!process_socd_cleaner(keycode, record, &socd_ws)) { 
+        return false; 
+    }
+    
+    if (!process_socd_cleaner(keycode, record, &socd_ad)) { 
+        return false; 
     }
 
     return true;
